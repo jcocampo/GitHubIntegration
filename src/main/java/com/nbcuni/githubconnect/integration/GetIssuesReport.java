@@ -14,9 +14,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
 
+import jxl.CellView;
 import jxl.Workbook;
+import jxl.format.Colour;
 import jxl.write.Label;
 import jxl.write.WritableCell;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
@@ -239,6 +243,7 @@ public class GetIssuesReport {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private static void generateReport(ArrayList<HashMap<String, String>> finalList) throws Exception{
 		
 		for (HashMap<String, String> xxx:finalList){
@@ -379,37 +384,12 @@ public class GetIssuesReport {
 	
 	private static void generateExcelFile(ArrayList<HashMap<String, String>> inputList, String sFile, String sheetName, boolean append) throws Exception{
 		
-		int col=0;
-		int row =0;
 		if (!inputList.isEmpty()){
 			if (!fileExists(sFile)){
 				WritableWorkbook workbook = Workbook.createWorkbook(new File(sFile));
 				WritableSheet sheet = workbook.createSheet(sheetName, 0);
-				
-				HashMap<String, String> temp = inputList.get(0);
-				
-				
-				//Set Column Headers
-				col=0;
-				row =0;
-				for (String title:temp.keySet()){
-					Label label = new Label(col, row, title);
-					sheet.addCell(label);
-					col++;
-				}
-				
-				col=0;
-				row =1;
-				for (HashMap<String, String> contentList:inputList){
-					for (Entry<String, String> content: contentList.entrySet()){
-						
-						Label label = new Label(col, row, content.getValue());
-						sheet.addCell(label);
-						col++;	
-					}
-					col=0;
-					row++;
-				}
+				generateColumnHeaders(inputList, sheet);
+				generateSheetContent(inputList, sheet);
 				
 				workbook.write();
 			    workbook.close();
@@ -420,34 +400,10 @@ public class GetIssuesReport {
 				
 				if (sheetToEdit == null){
 					sheetToEdit = workbookCopy.createSheet(sheetName, 0);
-					HashMap<String, String> tempx = inputList.get(0);
-					//Set Column Headers
-					col=0;
-					row =0;
-					for (String title:tempx.keySet()){
-						Label label = new Label(col, row, title);
-						sheetToEdit.addCell(label);
-						col++;
-					}	
+					generateColumnHeaders(inputList, sheetToEdit);
 				}
 				
-				WritableCell cell;
-				
-				col=0;
-				row =sheetToEdit.getRows();
-				
-				
-				for (HashMap<String, String> contentList:inputList){
-					for (Entry<String, String> content: contentList.entrySet()){
-						
-						Label label = new Label(col, row, content.getValue());
-						cell = (WritableCell) label;
-						sheetToEdit.addCell(cell);
-						col++;	
-					}
-					col=0;
-					row++;
-				}
+				generateSheetContent(inputList, sheetToEdit);
 				
 				workbookCopy.write();
 				workbookCopy.close();
@@ -455,6 +411,46 @@ public class GetIssuesReport {
 			}
 		}
 		
+	}
+	
+	private static void generateColumnHeaders(ArrayList<HashMap<String, String>> inputList, WritableSheet sheetName) throws Exception {
+		HashMap<String, String> tempx = inputList.get(0);
+		
+		WritableFont arial12ptBold = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD);
+		WritableCellFormat arial12BoldFormat = new WritableCellFormat(arial12ptBold);
+		arial12BoldFormat.setWrap(true);
+		arial12BoldFormat.setBackground(Colour.YELLOW);
+		
+		CellView cf = new CellView();
+		cf.setAutosize(true);
+		  
+		int col=0;
+		int row =0;
+		for (String title:tempx.keySet()){
+			Label label = new Label(col, row, title, arial12BoldFormat);
+			sheetName.addCell(label);
+			sheetName.setColumnView(col, cf);
+			col++;
+		}
+		
+		
+	}
+	
+	private static void generateSheetContent(ArrayList<HashMap<String, String>> inputList, WritableSheet sheetName) throws Exception {
+		int col=0;
+		int row =sheetName.getRows();
+		
+		for (HashMap<String, String> contentList:inputList){
+			for (Entry<String, String> content: contentList.entrySet()){
+				
+				Label label = new Label(col, row, content.getValue());
+				WritableCell cell = (WritableCell) label;
+				sheetName.addCell(cell);
+				col++;	
+			}
+			col=0;
+			row++;
+		}
 	}
 	
 	private static void deleteXLSFile(String sFile) throws Exception {
