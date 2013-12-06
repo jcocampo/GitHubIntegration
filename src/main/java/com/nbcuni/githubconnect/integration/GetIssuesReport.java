@@ -46,9 +46,8 @@ public class GetIssuesReport {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		
+
 		setAuthToken(args[0]);
-		
 		String xlsFile = "DefectReport.xls";
 		deleteXLSFile(xlsFile);
 		
@@ -419,7 +418,7 @@ public class GetIssuesReport {
 		WritableFont arial12ptBold = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD);
 		WritableCellFormat arial12BoldFormat = new WritableCellFormat(arial12ptBold);
 		arial12BoldFormat.setWrap(true);
-		arial12BoldFormat.setBackground(Colour.YELLOW);
+		arial12BoldFormat.setBackground(Colour.GREY_40_PERCENT);
 		
 		CellView cf = new CellView();
 		cf.setAutosize(true);
@@ -439,11 +438,41 @@ public class GetIssuesReport {
 	private static void generateSheetContent(ArrayList<HashMap<String, String>> inputList, WritableSheet sheetName) throws Exception {
 		int col=0;
 		int row =sheetName.getRows();
+		WritableFont arial12ptBold = new WritableFont(WritableFont.ARIAL, 10);
+		WritableCellFormat arial12BoldFormat = new WritableCellFormat(arial12ptBold);
+		arial12BoldFormat.setWrap(true);
+		Label label;
 		
 		for (HashMap<String, String> contentList:inputList){
+			boolean markAsRed = false;
+			boolean markAsOrange = false;
+			boolean markAsYellow = false;
+			if (contentList.get("Labels").contains("P1") || contentList.get("Labels").contains("Pri 1")){
+				markAsOrange = true;
+			}
+			
+			if (contentList.get("Labels").contains("P0")){
+				markAsRed = true;
+			}
+			
+			if (contentList.get("Labels").contains("P2") || contentList.get("Labels").contains("Pri 2")){
+				markAsYellow = true;
+			}
+			
 			for (Entry<String, String> content: contentList.entrySet()){
+				if (markAsRed){
+					arial12BoldFormat.setBackground(Colour.RED);
+					label = new Label(col, row, content.getValue(), arial12BoldFormat);
+				} else if (markAsOrange){
+					arial12BoldFormat.setBackground(Colour.LIGHT_ORANGE);
+					label = new Label(col, row, content.getValue(), arial12BoldFormat);
+//				} else if (markAsYellow){
+//					arial12BoldFormat.setBackground(Colour.YELLOW);
+//					label = new Label(col, row, content.getValue(), arial12BoldFormat);
+				} else {
+					label = new Label(col, row, content.getValue());
+				}
 				
-				Label label = new Label(col, row, content.getValue());
 				WritableCell cell = (WritableCell) label;
 				sheetName.addCell(cell);
 				col++;	
