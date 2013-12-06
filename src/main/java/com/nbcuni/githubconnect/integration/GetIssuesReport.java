@@ -46,7 +46,6 @@ public class GetIssuesReport {
 	}
 	
 	public static void main(String[] args) throws Exception {
-
 		setAuthToken(args[0]);
 		String xlsFile = "DefectReport.xls";
 		deleteXLSFile(xlsFile);
@@ -438,10 +437,7 @@ public class GetIssuesReport {
 	private static void generateSheetContent(ArrayList<HashMap<String, String>> inputList, WritableSheet sheetName) throws Exception {
 		int col=0;
 		int row =sheetName.getRows();
-		WritableFont arial12ptBold = new WritableFont(WritableFont.ARIAL, 10);
-		WritableCellFormat arial12BoldFormat = new WritableCellFormat(arial12ptBold);
-		arial12BoldFormat.setWrap(true);
-		Label label;
+		
 		
 		for (HashMap<String, String> contentList:inputList){
 			boolean markAsRed = false;
@@ -460,6 +456,12 @@ public class GetIssuesReport {
 			}
 			
 			for (Entry<String, String> content: contentList.entrySet()){
+				
+				WritableFont arial12ptBold = new WritableFont(WritableFont.ARIAL, 10);
+				WritableCellFormat arial12BoldFormat = new WritableCellFormat(arial12ptBold);
+				arial12BoldFormat.setWrap(true);
+				Label label;
+				
 				if (markAsRed){
 					arial12BoldFormat.setBackground(Colour.RED);
 					label = new Label(col, row, content.getValue(), arial12BoldFormat);
